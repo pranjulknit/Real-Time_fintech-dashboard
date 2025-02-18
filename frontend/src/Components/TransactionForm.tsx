@@ -1,6 +1,9 @@
 import React,{useState} from 'react';
 import axios from 'axios';
 import { port } from '../config';
+import { Navigate, useNavigate } from 'react-router-dom';
+
+
 
 
 const TransactionForm = () => {
@@ -10,11 +13,31 @@ const TransactionForm = () => {
         description:""
     });
 
+    const navigate = useNavigate();
+
     const handleSubmit = async(e:React.FormEvent)=>{
-        const token = localStorage.getItem("token");
+       
         e.preventDefault();
-        const response = await axios.post(`http://localhost:${port}/api/transactions`,formData,{headers:{Authorization:token}});
-        console.log("transaction add hua",response.data);
+        const token = localStorage.getItem("token");
+        
+        try{
+
+            const response = await axios.post(`http://localhost:${port}/api/transactions`,formData,{headers:{Authorization:token}});
+            console.log("transaction add hua",response.data);
+            alert("Transaction added successfully");
+            setFormData({
+                amount:"",category:"",description:""
+            })
+        }catch(e){
+            if(e.response && e.response.status === 401){
+                alert("Unauthorized. Please login again");
+                navigate("/")
+            }
+            else{
+                alert("Failed to add transaction. Please try again");
+                
+            }
+        }
     }
     
   return (
